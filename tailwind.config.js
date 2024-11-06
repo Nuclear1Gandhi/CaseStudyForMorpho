@@ -34,10 +34,10 @@ module.exports = {
       }
     },
     backgroundImage: {
-      primary: 'linear-gradient(223.53deg, rgba(165, 254, 202, 0.8) 3.65%, rgba(62, 220, 235, 0.8) 31.56%, rgba(37, 148, 255, 0.8) 65.16%, rgba(85, 51, 255, 0.8) 102.22%);',
-      primaryHover: 'linear-gradient(223.53deg, rgba(165, 254, 202, 0.9) 3.65%, rgba(62, 220, 235, 0.9) 31.56%, rgba(37, 148, 255, 0.9) 65.16%, rgba(85, 51, 255, 0.9) 102.22%);',
-      primaryActive: 'linear-gradient(223.53deg, #A5FECA 3.65%, #3EDCEB 31.56%, #2594FF 65.16%, #5533FF 102.22%);',
-      primaryDisabled: 'linear-gradient(223.53deg, rgba(165, 254, 202, 0.3) 3.65%, rgba(62, 220, 235, 0.3) 31.56%, rgba(37, 148, 255, 0.3) 65.16%, rgba(85, 51, 255, 0.3) 102.22%);'
+      primary: 'linear-gradient(184deg, rgba(165, 254, 202, 0.8) 3.65%, rgba(62, 220, 235, 0.8) 31.56%, rgba(37, 148, 255, 0.8) 65.16%, rgba(85, 51, 255, 0.8) 102.22%);',
+      primaryHover: 'linear-gradient(184deg, rgba(165, 254, 202, 0.9) 3.65%, rgba(62, 220, 235, 0.9) 31.56%, rgba(37, 148, 255, 0.9) 65.16%, rgba(85, 51, 255, 0.9) 102.22%);',
+      primaryActive: 'linear-gradient(184deg, #A5FECA 3.65%, #3EDCEB 31.56%, #2594FF 65.16%, #5533FF 102.22%);',
+      primaryDisabled: 'linear-gradient(184deg, rgba(165, 254, 202, 0.3) 3.65%, rgba(62, 220, 235, 0.3) 31.56%, rgba(37, 148, 255, 0.3) 65.16%, rgba(85, 51, 255, 0.3) 102.22%);'
     },
     boxShadow: {
       dp4: '0rem 0.1875rem 0.75rem 0rem #00000017;'
