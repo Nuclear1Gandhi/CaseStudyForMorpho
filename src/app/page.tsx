@@ -45,7 +45,7 @@ function App() {
   const [isMetaMorpho, setIsMetaMorpho] = useState<boolean | undefined>(undefined);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined)
   const inputContent = Content[State.Input];
-  const [vaultData, setVaultData] = useState<VaultData | undefined>(undefined)
+  const [redeemData, setRedeemData] = useState<VaultData | undefined>(undefined)
   const {
     data: redeemHash,
     isPending: isRedeeming,
@@ -55,12 +55,48 @@ function App() {
     reset
   } = useWriteContract()
 
+
+  const getRedeemData = async (account: Address) => {
+    const vault = createVaultContract({ address: inputAddress })
+
+    const [name, symbol, decimals, assetAddress, userShares, maxRedeem] = await Promise.all([
+      vault.read.name(),
+      vault.read.symbol(),
+      vault.read.decimals(),
+      vault.read.asset(),
+      vault.read.balanceOf([account]),
+      vault.read.maxRedeem([account])
+    ])
+
+    const asset = createErc20Contract({ assetAddress })
+
+    const [userAssets, userMaxWithdraw, assetSymbol, assetDecimals] = await Promise.all([
+      vault.read.convertToAssets([userShares]),
+      vault.read.convertToAssets([maxRedeem]),
+      asset.read.symbol(),
+      asset.read.decimals(),
+    ])
+    setRedeemData({
+      name,
+      symbol,
+      assetSymbol,
+      vaultDecimals: decimals,
+      assetDecimals,
+      userShares,
+      userAssets,
+      userMaxWithdraw,
+      formattedMaxWithdraw: formatResource(formatUnits(userMaxWithdraw, assetDecimals)),
+      formattedAssets: formatResource(formatUnits(userAssets, assetDecimals)),
+      formattedShares: formatResource(formatUnits(userShares, decimals)),
+    })
+  }
+
   useDebounceCallback(inputAddress as Address, async () => {
     try {
       /* Always reset input state and vault when its base value changes */
       setIsMetaMorpho(undefined);
       setErrorMessage(undefined);
-      setVaultData(undefined)
+      setRedeemData(undefined)
 
       if (!inputAddress || !account) return;
 
@@ -71,39 +107,8 @@ function App() {
         return;
       }
 
-      const vault = createVaultContract({ address: inputAddress })
 
-      const [name, symbol, decimals, assetAddress, userShares, maxRedeem] = await Promise.all([
-        vault.read.name(),
-        vault.read.symbol(),
-        vault.read.decimals(),
-        vault.read.asset(),
-        vault.read.balanceOf([account]),
-        vault.read.maxRedeem([account])
-      ])
-
-      const asset = createErc20Contract({ assetAddress })
-
-      const [userAssets, userMaxWithdraw, assetSymbol, assetDecimals] = await Promise.all([
-        vault.read.convertToAssets([userShares]),
-        vault.read.convertToAssets([maxRedeem]),
-        asset.read.symbol(),
-        asset.read.decimals(),
-      ])
-      setVaultData({
-        name,
-        symbol,
-        assetSymbol,
-        vaultDecimals: decimals,
-        assetDecimals,
-        userShares,
-        userAssets,
-        userMaxWithdraw,
-        formattedMaxWithdraw: formatResource(formatUnits(userMaxWithdraw, assetDecimals)),
-        formattedAssets: formatResource(formatUnits(userAssets, assetDecimals)),
-        formattedShares: formatResource(formatUnits(userShares, decimals)),
-      })
-
+      await getRedeemData(account)
       setIsMetaMorpho(true)
     } catch (error: any) {
       if (inputContent[error?.name as keyof typeof inputContent]) {
@@ -117,13 +122,13 @@ function App() {
   })
 
   const redeem = async () => {
-    if (!vaultData || !account) return;
+    if (!redeemData || !account) return;
 
     writeContract({
       abi: MetamorphoVaultABI,
       address: inputAddress as Address,
       functionName: 'redeem',
-      args: [vaultData.userMaxWithdraw, account, account],
+      args: [redeemData.userMaxWithdraw, account, account],
       chain: CaseStudyForMorphoChain,
     })
   }
@@ -147,13 +152,16 @@ function App() {
     )
   }
 
-  if (redeemHash && (isSuccess || isError) && vaultData) {
+  if (redeemHash && (isSuccess || isError) && redeemData) {
     const _description = Content[isSuccess ? State.Success : State.Failure].description
     const description = typeof _description === 'string'
       ? _description
-      : _description(formatUnits(vaultData?.userAssets, vaultData?.assetDecimals), vaultData?.assetSymbol ?? '')
+      : _description(formatUnits(redeemData?.userAssets, redeemData?.assetDecimals), redeemData?.assetSymbol ?? '')
     return (
-      <TransactionResult onClick={() => reset()} success={isSuccess} >
+      <TransactionResult onClick={() => {
+        getRedeemData(account as Address)
+        reset();
+      }} success={isSuccess} >
         <p className="text-xxxs text-color-tertiary mt-1">{description}</p>
       </TransactionResult>
     )
@@ -171,17 +179,17 @@ function App() {
           onChange={(e) => setInputAddress(e.target.value)}
         />
       </Card>}
-      {vaultData && !redeemHash && account &&
+      {redeemData && !redeemHash && account &&
         <Card
           className='flex flex-col h-[20.0625rem] w-[21.875rem] px-5 py-[3.125rem] justify-center'
         >
-          <p className='text-color-body text-xl mb-[25px]'>{vaultData.name} {vaultData.symbol}</p>
+          <p className='text-color-body text-xl mb-[25px]'>{redeemData.name} {redeemData.symbol}</p>
           <div className='flex flex-col gap-2.5 mb-[50px]'>
-            <ValueDisplay label={Content[State.Withdraw].sharesLabel} value={`${vaultData.formattedShares} ${vaultData.symbol}`} />
-            <ValueDisplay label={Content[State.Withdraw].assetsLabel} value={`${vaultData.formattedAssets} ${vaultData.assetSymbol}`} />
+            <ValueDisplay label={Content[State.Withdraw].sharesLabel} value={`${redeemData.formattedShares} ${redeemData.symbol}`} />
+            <ValueDisplay label={Content[State.Withdraw].assetsLabel} value={`${redeemData.formattedAssets} ${redeemData.assetSymbol}`} />
           </div>
-          <Button className='flex justify-center items-center' disabled={Number(vaultData.userShares) <= 0 || isRedeeming} onClick={async () => redeem()}>
-            <p className='text-xs'> {isRedeeming ? Content[State.Withdraw].signButton : `${Content[State.Withdraw].button} ${vaultData.formattedMaxWithdraw} ${vaultData.assetSymbol}`}</p>
+          <Button className='flex justify-center items-center' disabled={Number(redeemData.userShares) <= 0 || isRedeeming} onClick={async () => redeem()}>
+            <p className='text-xs'> {isRedeeming ? Content[State.Withdraw].signButton : `${Content[State.Withdraw].button} ${redeemData.formattedMaxWithdraw} ${redeemData.assetSymbol}`}</p>
           </Button>
         </Card>
       }
