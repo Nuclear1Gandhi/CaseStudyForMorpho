@@ -31,7 +31,11 @@ something like i18n for translation which would then store all the text
 You will need following env variables to run this properly:
 
 NEXT_PUBLIC_WC_PROJECT_ID="51ef0227c7a3bb9a166a7b535aecfbdd" -> the id of wallet connect project to connect to app
+
 NEXT_PUBLIC_METAMORPHO_FACTORY_ADDRESS="0xA9c3D3a366466Fa809d1Ae982Fb2c46E5fC41101"
+
 NEXT_PUBLIC_ETHERSCAN_LINK="https://etherscan.io/"
+
 NEXT_PUBLIC_RPC_URL="https://virtual.mainnet.rpc.tenderly.co/ebc762bd-35db-433b-ab83-06d68a8b87be" - rpc url
+
 NEXT_PUBLIC_CHAIN_ID="2" -> 2 so that we can test chain switching
