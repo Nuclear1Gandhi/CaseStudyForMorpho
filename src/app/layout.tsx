@@ -9,7 +9,6 @@ import { Providers } from './providers'
 
 import './globals.css'
 
-//todo
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
