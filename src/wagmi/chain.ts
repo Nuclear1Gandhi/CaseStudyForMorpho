@@ -1,7 +1,7 @@
 import { type Chain, } from 'viem'
 
 export const CaseStudyForMorphoChain = {
-  id: 1,
+  id: +process.env.NEXT_PUBLIC_CHAIN_ID!,
   name: 'CaseStudyForMorpho',
   nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
   rpcUrls: {
