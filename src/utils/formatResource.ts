@@ -1,0 +1,1 @@
+export const formatResource = (str: string, decimals: number = 2) => str.slice(0, (str.indexOf('.') + 1) + decimals) 
